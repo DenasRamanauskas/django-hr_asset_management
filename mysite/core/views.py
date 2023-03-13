@@ -2,8 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
 from django.http import HttpResponse
 from .models import User, Employer, Employee, Asset, AssignedAsset
-
-from .forms import EmployerSignupForm
+from .forms import EmployerSignupForm, EmployeeCreationForm
 
 # Create your views here.
 def home(request):
@@ -51,3 +50,15 @@ def employer_profile(request):
 
 def employer_notifications(request):
     return render(request, 'core/employer/notifications.html')
+def employee_add(request):
+    if request.method == 'POST':
+        form = EmployeeCreationForm(request.POST)
+        if form.is_valid():
+            emp = form.save()
+            emp.is_employee = True
+            emp.save()
+            Employee.objects.create(user=emp, employer=request.user.employer)
+    else:
+        form = EmployeeCreationForm()
+
+    return render(request, 'core/employer/employee_add.html', {'form': form})
