@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
 from django.http import HttpResponse
+from .models import User, Employer, Employee, Asset, AssignedAsset
 
 from .forms import EmployerSignupForm
 
@@ -36,3 +37,9 @@ def login_redirect(request):
     if request.user.is_employer:
         return redirect('core:employer_dashboard')
     return redirect('core:employee_dashboard')
+
+def employees_list(request):
+    user = request.user
+    employees = Employee.objects.filter(employer=user.employer)
+    employees = [e.user for e in employees]
+    return render(request, 'core/employer/employees.html', {'employees': employees})

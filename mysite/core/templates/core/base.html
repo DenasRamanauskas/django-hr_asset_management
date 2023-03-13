@@ -27,7 +27,7 @@
                       <div class="collapse navbar-collapse" id="navbarSupportedContent">
                         <ul class="navbar-nav mr-auto">
                             {% if user.is_authenticated %}
-                                <li class="nav-item active" id="logout-btn">
+                                <li class="nav-item active my-btn" id="logout-btn">
                                     <a class="nav-link" href="{% url 'core:logout' %}">Logout <span class="sr-only">(current)</span></a>
                                 </li>
                             {% else %}
