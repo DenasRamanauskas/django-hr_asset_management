@@ -1,5 +1,4 @@
 $(function() {
-
     /* main-tabbed-nav (dashboards) - on click handler */
     function updateMainContent(url) { // fetch url and display on .main-content
         let mainContent = $('.main-content .card-body');
@@ -48,5 +47,4 @@ $(function() {
 
     /* display employees list on employer dashboard by default */
     updateMainContent('/employer/employees');
-
 });

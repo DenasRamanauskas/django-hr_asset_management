@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.db import transaction
-from .models import (User, Employer, Asset, AssignedAsset)
+from .models import (User, Employer, Employee, Asset, AssignedAsset)
 
 # employer signup form
 class EmployerSignupForm(UserCreationForm):
@@ -26,17 +26,25 @@ class EmployerSignupForm(UserCreationForm):
             company=company,
             number_of_employees=no_of_emp
         )
-
         return user
 
 # employee creation form.
 # the employee profile which has employer_id,
 # will be created in the employee_add view
 # since we do not have the request object to get the current user
-class EmployeeCreationForm(UserCreationForm):
-    class Meta(UserCreationForm.Meta):
+class EmployeeCreationForm(forms.ModelForm):
+    class Meta():
         model = User
-        fields = ['username', 'email']
+        fields = ['username', 'email', 'position']
+
+    # designate user as an employee
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.is_employee = True
+        user.save()
+
+
+    # requires an employer object to associate employee with
 
     @transaction.atomic
     def save(self):

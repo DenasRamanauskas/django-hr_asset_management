@@ -38,7 +38,11 @@ def employees_list(request):
     user = request.user
     employees = Employee.objects.filter(employer=user.employer)
     employees = [e.user for e in employees]
-    return render(request, 'core/employer/employees.html', {'employees': employees})
+    emp_creation_form = EmployeeCreationForm()
+    return render(request, 'core/employer/employees.html', {
+        'employees': employees,
+        'form': emp_creation_form
+    })
 
 def employer_assets(request):
     user = request.user
@@ -54,10 +58,9 @@ def employee_add(request):
     if request.method == 'POST':
         form = EmployeeCreationForm(request.POST)
         if form.is_valid():
-            emp = form.save()
-            emp.is_employee = True
-            emp.save()
-            Employee.objects.create(user=emp, employer=request.user.employer)
+            form.save()
+            emp = form.add_employer(request.user.employer)
+            return redirect('core:employer_dashboard')
     else:
         form = EmployeeCreationForm()
 
