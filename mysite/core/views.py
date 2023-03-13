@@ -68,12 +68,24 @@ def employees_list(request):
 
 def employer_assets(request):
     user = request.user
-    assets = Asset.objects.filter(employer=user.employer)
-    form = AssetCreationForm()
+    employer_assets = Asset.objects.filter(employer=user.employer)
+    all_assigned_assets = AssignedAsset.objects.all() # not effective
+    assets = [] # build a list of tuples, (asset, employee_assigned_to or None)
+    l = [a.asset for a in all_assigned_assets]
+    for asset in employer_assets:
+        try:
+            i = l.index(asset) # if asset is assigned, get it index in l
+            assets.append((asset, all_assigned_assets[i].employee))
+        except ValueError:
+            assets.append((asset, None))
+
+    new_asset_form = AssetCreationForm()
+    asset_assign_form = AssignAssetForm()
 
     return render(request, 'core/employer/assets.html', {
         'assets': assets,
-        'form': form
+        'new_asset_form': new_asset_form,
+        'asset_assign_form': asset_assign_form
     })
 
 def employer_notifications(request):
@@ -108,7 +120,7 @@ def asset_add(request):
             form = AssetCreationForm()
     else: # GET
         form = AssetCreationForm()
-    return render(request, 'core/employer/asset_add.html', {'form': form})
+    return render(request, 'core/employer/asset_add.html', {'new_asset_form': form})
 
 
 # display employee assigned asset
@@ -129,4 +141,26 @@ def employee_profile(request):
 
     return render(request, 'core/employee/profile.html', {'form': form})
 
+# assign an asset to an employee
+def asset_assign(request):
+    if request.method == 'POST':
+        form = AssignAssetForm(request.POST)
+        if form.is_valid():
+            asset_id = form.cleaned_data.get('asset_id')
+            employee_email = form.cleaned_data.get('employee_email')
 
+            AssignedAsset.objects.create(
+                asset = Asset.objects.get(asset=asset_id),
+                employee = User.objects.get(email=employee_email).employee
+            )
+
+            # unbind form
+            form = AssignAssetForm()
+    else:
+        form = AssignAssetForm()
+
+    return render(request, 'core/employer/asset_assign.html', {'asset_assign_form': form})
+
+# reclaim an assigned asset
+def asset_reclaim(request):
+    pass

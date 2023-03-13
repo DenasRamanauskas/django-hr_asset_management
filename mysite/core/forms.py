@@ -99,3 +99,9 @@ class AssetCreationForm(forms.ModelForm):
         asset.save()
 
         return asset
+
+# assign as asset
+class AssignAssetForm(forms.Form):
+    asset_id = forms.CharField()
+    employee_email = forms.EmailField()
+
