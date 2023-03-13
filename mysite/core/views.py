@@ -1,8 +1,8 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login
 from django.http import HttpResponse
+from django.contrib.auth import authenticate, login
+from .forms import *
 from .models import User, Employer, Employee, Asset, AssignedAsset
-from .forms import EmployerSignupForm, EmployeeCreationForm, AssetCreationForm
 
 # Create your views here.
 def home(request):
@@ -22,6 +22,28 @@ def employer_signup(request):
     else:
         form = EmployerSignupForm()
     return render(request, 'core/employer/signup.html', {'form': form})
+
+
+# employer profile
+def employer_profile(request):
+    user = request.user
+    form = EmployerProfileForm(request.POST or None, instance=user, initial={
+        'company_name': user.employer.company,
+        'number_of_employees': user.employer.number_of_employees
+    })
+
+    if request.method == 'POST':
+        if form.is_valid():
+            user = form.save()
+
+        # rebind form due to employer profile
+        form = EmployerProfileForm(request.POST, instance = user, initial={
+            'company_name': user.employer.company,
+            'number_of_employees': user.employer.number_of_employees
+        })
+
+    return render(request, 'core/employer/profile.html', {'form': form})
+
 
 def employer_dashboard(request):
     return render(request, 'core/employer/dashboard.html')
@@ -54,18 +76,17 @@ def employer_assets(request):
         'form': form
     })
 
-def employer_profile(request):
-    return render(request, 'core/employer/profile.html')
-
 def employer_notifications(request):
     return render(request, 'core/employer/notifications.html')
 def employee_add(request):
     if request.method == 'POST':
         form = EmployeeCreationForm(request.POST)
         if form.is_valid():
-            form.save()
-            emp = form.add_employer(request.user.employer)
-            # unbind form for adding another user
+            employee = form.save()
+            Employee.objects.create(
+                user = employee,
+                employer = request.user.employer
+            )
             form = EmployeeCreationForm()
 
             # return redirect('core:employer_dashboard')
