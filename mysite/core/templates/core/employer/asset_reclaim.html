@@ -1,5 +1,7 @@
 {% include './_handle_asset_reclaim_script.html' %}
 
+{% load crispy_forms_tags %}
+
 <form method="post" action="{% url 'core:asset_reclaim' %}" id="asset-reclaim-form">
     {% include '../_messages.html' %}
     {% csrf_token %}
