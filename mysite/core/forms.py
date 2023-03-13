@@ -71,6 +71,17 @@ class EmployeeCreationForm(forms.ModelForm):
 
         return user
 
+# employee view/update profile
+class EmployeeProfileForm(forms.ModelForm):
+
+    class Meta:
+        model = User
+        fields = (
+            'username',
+            'email',
+            'phone_number',
+        )
+
 class AssetCreationForm(forms.ModelForm):
 
     class Meta:

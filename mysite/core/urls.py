@@ -16,6 +16,8 @@ urlpatterns = [
     path('asset/add/', core_views.asset_add, name='asset_add'),
 
     path('employee/dashboard/', core_views.employee_dashboard, name='employee_dashboard'),
+    path('employee/assigned-assets/', core_views.employee_assigned_assets, name='employee_assigned_assets'),
+    path('employee/profile/', core_views.employee_profile, name='employee_profile'),
 
     path('login/', auth_views.LoginView.as_view(), name='login'),
     path('login_redirect', core_views.login_redirect, name='login_redirect'),
