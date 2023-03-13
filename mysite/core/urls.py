@@ -16,6 +16,7 @@ urlpatterns = [
     path('asset/add/', core_views.asset_add, name='asset_add'),
     path('asset/assign/', core_views.asset_assign, name='asset_assign'),
     path('asset/reclaim/', core_views.asset_reclaim, name='asset_reclaim'),
+    path('edit/employee/position/', core_views.employee_position_edit, name='employee_position_edit'),
 
     path('employee/dashboard/', core_views.employee_dashboard, name='employee_dashboard'),
     path('employee/assigned-assets/', core_views.employee_assigned_assets, name='employee_assigned_assets'),

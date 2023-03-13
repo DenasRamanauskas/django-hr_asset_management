@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
 from django.contrib.auth import authenticate, login
+from django.contrib import messages
+from django.http import HttpResponse
 from .forms import *
 from .models import User, Employer, Employee, Asset, AssignedAsset
 
@@ -35,12 +36,8 @@ def employer_profile(request):
     if request.method == 'POST':
         if form.is_valid():
             user = form.save()
-
-        # rebind form due to employer profile
-        form = EmployerProfileForm(request.POST, instance = user, initial={
-            'company_name': user.employer.company,
-            'number_of_employees': user.employer.number_of_employees
-        })
+            messages.success(request, "Profile has been updated successfully")
+            return redirect('core:employer_profile')
 
     return render(request, 'core/employer/profile.html', {'form': form})
 
@@ -61,9 +58,11 @@ def employees_list(request):
     employees = Employee.objects.filter(employer=user.employer)
     employees = [e.user for e in employees]
     emp_creation_form = EmployeeCreationForm()
+    employee_position_edit_form = EmployeePositionChangeForm()
     return render(request, 'core/employer/employees.html', {
         'employees': employees,
-        'form': emp_creation_form
+        'employee_creation_form': emp_creation_form,
+        'employee_position_edit_form': employee_position_edit_form
     })
 
 def employer_assets(request):
@@ -102,13 +101,31 @@ def employee_add(request):
                 user = employee,
                 employer = request.user.employer
             )
-            form = EmployeeCreationForm()
-
-            # return redirect('core:employer_dashboard')
+            messages.success(request, 'Employee has been added successfully')
+            return redirect('core:employee_add')
     else:
         form = EmployeeCreationForm()
 
-    return render(request, 'core/employer/employee_add.html', {'form': form})
+    return render(request, 'core/employer/employee_add.html', {'employee_creation_form': form})
+
+def employee_position_edit(request):
+    if request.method == 'POST':
+        email = request.POST['email']
+        employee = User.objects.get(email=email)
+        form = EmployeePositionChangeForm(request.POST, instance=employee)
+        if form.is_valid():
+            # new_position = form.cleaned_data.get('position')
+            employee = form.save()
+
+            messages.success(request, 'Employee {} position changed to {}'.format(
+                                employee.email,
+                                employee.position
+                            ))
+            return redirect('core:employee_position_edit')
+    else:
+        form = EmployeePositionChangeForm()
+
+    return render(request, 'core/employer/employee_position_edit.html', {'employee_position_edit_form': form})
 
 # add company asset
 def asset_add(request):
@@ -117,10 +134,10 @@ def asset_add(request):
         if form.is_valid():
             # set the owner/employer before save
             form.set_employer(request.user.employer)
-            form.save()
+            asset = form.save()
 
-            # unbind form for adding another asset
-            form = AssetCreationForm()
+            messages.success(request, 'Asset ' + asset.asset + ' added successfully.')
+            return redirect('core:asset_add')
     else: # GET
         form = AssetCreationForm()
     return render(request, 'core/employer/asset_add.html', {'new_asset_form': form})
@@ -141,7 +158,7 @@ def employee_profile(request):
     if request.method == 'POST':
         if form.is_valid():
             user = form.save()
-
+            messages.success(request, 'Your profile has been updated.')
     return render(request, 'core/employee/profile.html', {'form': form})
 
 # assign an asset to an employee
@@ -152,13 +169,14 @@ def asset_assign(request):
             asset_id = form.cleaned_data.get('asset_id')
             employee_email = form.cleaned_data.get('employee_email')
 
-            AssignedAsset.objects.create(
+            asset = AssignedAsset.objects.create(
                 asset = Asset.objects.get(asset=asset_id),
                 employee = User.objects.get(email=employee_email).employee
             )
 
-            # unbind form
-            form = AssignAssetForm()
+            messages.success(request,
+                'Asset ' + asset.asset.asset + ' has been assigned to '+ asset.employee.user.email)
+            return redirect('core:asset_assign') # for assigning another asset
     else:
         form = AssignAssetForm()
 
@@ -170,14 +188,11 @@ def asset_reclaim(request):
         form = ReclaimAssetForm(request.POST)
         if form.is_valid():
             asset_id = form.cleaned_data.get('asset_id')
-            print('\n\n==',asset_id, '==\n\n')
-
             assigned_asset = AssignedAsset.objects.get(asset_id=asset_id)
             assigned_asset.delete()
-
-            # unbind form
-            form = ReclaimAssetForm()
+            messages.success(request,
+                'Asset' + assigned_asset.asset.asset + ' has been re-claimed from '+ assigned_asset.employee.user.email)
+            return redirect('core:asset_reclaim') # for reclaiming another asset
     else:
         form = ReclaimAssetForm()
-
     return render(request, 'core/employer/asset_reclaim.html', {'asset_reclaim_form': form})
