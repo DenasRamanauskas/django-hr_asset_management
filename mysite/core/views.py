@@ -13,9 +13,7 @@ def employer_signup(request):
     if request.method == 'POST':
         form = EmployerSignupForm(request.POST)
         if form.is_valid():
-            form.save()  # add employer to db
-
-            # authenticate and login employer
+            form.save()
             email = form.cleaned_data.get('email')
             password1 = form.cleaned_data.get('password1')
             user = authenticate(request, email=email, password=password1)
@@ -24,7 +22,6 @@ def employer_signup(request):
                 return redirect('core:employer_dashboard')
     else:
         form = EmployerSignupForm()
-
     return render(request, 'core/employer/signup.html', {'form': form})
 
 def employer_dashboard(request):
@@ -43,3 +40,14 @@ def employees_list(request):
     employees = Employee.objects.filter(employer=user.employer)
     employees = [e.user for e in employees]
     return render(request, 'core/employer/employees.html', {'employees': employees})
+
+def employer_assets(request):
+    user = request.user
+    assets = Asset.objects.filter(employer=user.employer)
+    return render(request, 'core/employer/assets.html', {'assets': assets})
+
+def employer_profile(request):
+    return render(request, 'core/employer/profile.html')
+
+def employer_notifications(request):
+    return render(request, 'core/employer/notifications.html')

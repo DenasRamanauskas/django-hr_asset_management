@@ -7,7 +7,7 @@ class User(AbstractUser):
     is_employer = models.BooleanField(default=False)
     is_employee = models.BooleanField(default=False)
     position = models.CharField(max_length=200, default=None, blank=True, null=True)
-    phone_number = models.CharField(max_length=12, blank=False, help_text=('e.g. +370xxxxxxxx'))
+    phone_number = models.CharField(max_length=12, default=None, blank=True, null=True, help_text=('e.g. +370xxxxxxxx'))
     date_of_birth = models.DateField(default=None, blank=True, null=True)
 
     REQUIRED_FIELDS = ['username',]
