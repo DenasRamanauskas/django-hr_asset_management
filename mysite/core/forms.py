@@ -33,7 +33,7 @@ class EmployerSignupForm(UserCreationForm):
 # will be created in the employee_add view
 # since we do not have the request object to get the current user
 class EmployeeCreationForm(forms.ModelForm):
-    class Meta():
+    class Meta:
         model = User
         fields = ['username', 'email', 'position']
 
@@ -43,19 +43,33 @@ class EmployeeCreationForm(forms.ModelForm):
         user.is_employee = True
         user.save()
 
-
-    # requires an employer object to associate employee with
-
     @transaction.atomic
-    def save(self):
+    def add_employer(self, employer):
         user = super().save(commit=False)
         user.is_employee = True
         user.save()
 
-        # employee profile omitted.
-        # employee = Employer.objects.create(
-        # employee = Employee.objects.create(
-        #       user = user,
-        #       employer = request.user
-        #       employer = request.user.employer
-        #)
+        employee = Employee.objects.create(
+            user=user,
+            employer=employer
+        )
+
+        return user
+
+class AssetCreationForm(forms.ModelForm):
+
+    class Meta:
+        model = Asset
+        fields = ['asset', 'description']
+
+    # asset belongs to an employer
+    def set_employer(self, employer):
+        self.employer = employer
+
+    @transaction.atomic
+    def save(self, commit=True):
+        asset = super().save(commit=False)
+        asset.employer = self.employer # expects employer to have been set
+        asset.save()
+
+        return asset
