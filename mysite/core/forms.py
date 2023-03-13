@@ -100,8 +100,11 @@ class AssetCreationForm(forms.ModelForm):
 
         return asset
 
-# assign as asset
+# assign an asset
 class AssignAssetForm(forms.Form):
     asset_id = forms.CharField()
     employee_email = forms.EmailField()
 
+# reclaim an asset
+class ReclaimAssetForm(forms.Form):
+    asset_id = forms.CharField()
