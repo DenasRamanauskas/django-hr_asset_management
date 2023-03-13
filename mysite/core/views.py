@@ -6,13 +6,8 @@ from .forms import EmployerSignupForm
 
 # Create your views here.
 def home(request):
-    '''
-    handles requests to the home page.
-    '''
     return render(request, 'core/home.html')
 
-
-# handles employer signup requests
 def employer_signup(request):
     if request.method == 'POST':
         form = EmployerSignupForm(request.POST)
@@ -29,14 +24,14 @@ def employer_signup(request):
     else:
         form = EmployerSignupForm()
 
-    return render(request, 'core/employer_signup.html', {'form': form})
+    return render(request, 'core/employer/signup.html', {'form': form})
 
-
-# the employer dashboard
 def employer_dashboard(request):
-    return render(request, 'core/employer_dashboard.html')
+    return render(request, 'core/employer/dashboard.html')
 
-# redirect employer to employer_dashboard and employee to employee_dashboard
+def employee_dashboard(request):
+    return render(request, 'core/employee/dashboard.html')
+
 def login_redirect(request):
     if request.user.is_employer:
         return redirect('core:employer_dashboard')
