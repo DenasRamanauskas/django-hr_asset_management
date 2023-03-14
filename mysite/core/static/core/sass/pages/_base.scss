@@ -13,6 +13,7 @@ header.header {
 @media (min-width: 0px) and (max-width: 768px) {
     #login-btn, #logout-btn, #employer-signup-btn {
         font-weight: 500;
+        border-style: none;
     }
 }
 

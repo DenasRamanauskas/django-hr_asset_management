@@ -3,10 +3,17 @@ from django.contrib.auth.forms import UserCreationForm
 from django.db import transaction
 from .models import (User, Employer, Employee, Asset, AssignedAsset)
 
-# employer signup form
+
 class EmployerSignupForm(UserCreationForm):
     company_name = forms.CharField()
-    number_of_employees = forms.IntegerField()
+    CHOICES = (
+        ('', 'Choose'),
+        ('10', '10 Employees'),
+        ('50', '50 Employees'),
+        ('100', '100 Employees'),
+        ('1000', '1000 Employees'),
+    )
+    number_of_employees = forms.ChoiceField(choices=CHOICES)
 
     class Meta(UserCreationForm.Meta):
         model = User
@@ -18,7 +25,6 @@ class EmployerSignupForm(UserCreationForm):
         user.is_employer = True
         user.save()
 
-        # create employer profile for user
         company = self.cleaned_data.get('company_name')
         no_of_emp = self.cleaned_data.get('number_of_employees')
         employer = Employer.objects.create(
@@ -29,10 +35,16 @@ class EmployerSignupForm(UserCreationForm):
         return user
 
 
-# employer view/update profile
 class EmployerProfileForm(forms.ModelForm):
     company_name = forms.CharField()
-    number_of_employees = forms.IntegerField()
+    CHOICES = (
+        ('', 'Choose...'),
+        ('10', '10 Employees'),
+        ('50', '50 Employees'),
+        ('100', '100 Employees'),
+        ('1000', '1000 Employees'),
+    )
+    number_of_employees = forms.ChoiceField(choices=CHOICES)
 
     class Meta:
         model = User
@@ -44,20 +56,18 @@ class EmployerProfileForm(forms.ModelForm):
 
     def save(self):
         user = super().save()
-
-        # update corresponding employer profile
         user.employer.company = self.cleaned_data.get('company_name')
         user.employer.number_of_employees = self.cleaned_data.get('number_of_employees')
         user.employer.save()
 
         return user
 
+
 class EmployeeCreationForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ['username', 'email', 'position']
 
-    # designate user as an employee
     def save(self, commit=True):
         user = super().save(commit=False)
         user.is_employee = True
@@ -71,16 +81,14 @@ class EmployeeCreationForm(forms.ModelForm):
 
         return user
 
-# employee position change form
-class EmployeePositionChangeForm(forms.ModelForm):
 
+class EmployeePositionChangeForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ['email', 'position']
 
-# employee view/update profile
-class EmployeeProfileForm(forms.ModelForm):
 
+class EmployeeProfileForm(forms.ModelForm):
     class Meta:
         model = User
         fields = (
@@ -89,29 +97,28 @@ class EmployeeProfileForm(forms.ModelForm):
             'phone_number',
         )
 
-class AssetCreationForm(forms.ModelForm):
 
+class AssetCreationForm(forms.ModelForm):
     class Meta:
         model = Asset
         fields = ['asset', 'description']
 
-    # asset belongs to an employer
     def set_employer(self, employer):
         self.employer = employer
 
     @transaction.atomic
     def save(self, commit=True):
         asset = super().save(commit=False)
-        asset.employer = self.employer # expects employer to have been set
+        asset.employer = self.employer
         asset.save()
 
         return asset
 
-# assign an asset
+
 class AssignAssetForm(forms.Form):
     asset_id = forms.CharField()
     employee_email = forms.EmailField()
 
-# reclaim an asset
+
 class ReclaimAssetForm(forms.Form):
     asset_id = forms.CharField()

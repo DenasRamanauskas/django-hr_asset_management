@@ -5,6 +5,6 @@
 <form method="post" action="{% url 'core:employee_add' %}" id="employee-add-form" >
     {% include '../_messages.html' %}
     {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" id="employee-add-btn">Add</button>
+    {{ employee_creation_form | crispy }}
+    <button type="submit" id="employee-add-btn" class="my-btn my-btn-primary p-2">Add</button>
 </form>
